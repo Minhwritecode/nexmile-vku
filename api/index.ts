@@ -45,14 +45,14 @@ app.use(
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Ensure DB connected on every request
+// Ensure DB connected on every request without crashing if IP not whitelisted
 app.use(async (_req, _res, next) => {
   try {
     await connectDB();
-    next();
   } catch (err) {
-    next(err);
+    console.warn('MongoDB Atlas connection deferred:', (err as any).message);
   }
+  next();
 });
 
 // Health check
