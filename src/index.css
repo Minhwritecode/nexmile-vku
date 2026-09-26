@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+/* ===== Custom Keyframe Animations ===== */
+
+/* Pulse animation for the "Đề xuất tốt nhất" card */
+@keyframes recommendedPulse {
+  0%, 100% {
+    box-shadow: 0 20px 40px -12px rgb(6 95 70 / 0.4), 0 0 0 1px rgb(16 185 129 / 0.5);
+    transform: translateY(0px);
+  }
+  50% {
+    box-shadow: 0 24px 50px -10px rgb(6 95 70 / 0.6), 0 0 0 3px rgb(16 185 129 / 0.3), 0 0 20px 4px rgb(16 185 129 / 0.15);
+    transform: translateY(-2px);
+  }
+}
+
+/* Bar chart grow animation for hourly weather chart */
+@keyframes barGrowUp {
+  from {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+/* Fade slide in for chart */
+@keyframes chartFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

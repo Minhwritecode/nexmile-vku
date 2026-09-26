@@ -1,0 +1,6 @@
+{
+  "name": "NexMile - Trợ lý AI xe buýt VKU",
+  "description": "AI chọn chuyến thông minh, giảm thời gian chờ, đến trường VKU Đà Nẵng đúng giờ.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
