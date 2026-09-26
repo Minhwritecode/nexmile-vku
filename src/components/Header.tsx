@@ -56,11 +56,11 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
     const updateTime = () => {
       const now = new Date();
       setCurrentTime(
-        now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
       );
     };
     updateTime();
-    const interval = setInterval(updateTime, 1000);
+    const interval = setInterval(updateTime, 60_000); // update per minute, not per second
     return () => clearInterval(interval);
   }, []);
 
@@ -111,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
           {/* Live Clock */}
           <div className="hidden md:flex items-center gap-1.5 bg-slate-800/60 border border-slate-700/60 px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>{currentTime || '07:15:00'}</span>
+            <span>{currentTime || '07:15'}</span>
           </div>
 
           {/* Weather Quick Switch connected to VKU Campus Station */}
