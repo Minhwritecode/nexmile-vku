@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as THREE from 'three';
 import { 
   Bus, 
   Sparkles, 
@@ -55,8 +54,15 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
 
   // --- THREE.JS BACKGROUND SCENE (Synchronized with Splash Design) ---
   useEffect(() => {
-    if (!containerRef.current) return;
-    const container = containerRef.current;
+    let cancelled = false;
+    let cleanupScene: (() => void) | undefined;
+
+    const initializeScene = async () => {
+      // Load the WebGL engine after the form is available. This prevents the
+      // 550KB Three.js chunk from delaying the first usable login screen.
+      const THREE = await import('three');
+      if (cancelled || !containerRef.current) return;
+      const container = containerRef.current;
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x020617, 0.032); // Deep slate atmosphere
@@ -357,7 +363,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
 
     window.addEventListener('resize', handleResize);
 
-    return () => {
+    cleanupScene = () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
@@ -365,6 +371,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onAuthenticated }) => {
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
+    };
+    };
+
+    void initializeScene();
+    return () => {
+      cancelled = true;
+      cleanupScene?.();
     };
   }, []);
 

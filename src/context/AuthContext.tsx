@@ -33,33 +33,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [token, setToken] = useState<string | null>(() => {
     return localStorage.getItem(TOKEN_KEY) || null;
   });
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Authentication is optimistic on boot: a missing session must not wait for
+  // the API/DB before the login screen can be displayed.
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [serverConnected, setServerConnected] = useState<boolean>(false);
 
-  // Check health and validate token on boot
+  // Validate a cached session without blocking the first paint.
   const verifyTokenAndServer = useCallback(async () => {
+    const savedToken = localStorage.getItem(TOKEN_KEY);
+
+    // There is nothing to verify for a new/anonymous visitor. In particular,
+    // do not block the login screen on a serverless function cold start.
+    if (!savedToken) {
+      setServerConnected(false);
+      setUser(null);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const isHealthy = await authApi.checkHealth();
-      setServerConnected(isHealthy);
-
-      const savedToken = localStorage.getItem(TOKEN_KEY);
-      if (savedToken && isHealthy) {
-        const res = await authApi.getMe(savedToken);
-        if (res.success && res.user) {
-          setUser(res.user);
-          localStorage.setItem(USER_KEY, JSON.stringify(res.user));
-        } else {
-          // Token invalid or expired
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(USER_KEY);
-          setToken(null);
-          setUser(null);
-        }
-      } else if (!savedToken) {
+      // One request is enough. getMe also proves both API and DB availability.
+      const res = await authApi.getMe(savedToken);
+      setServerConnected(true);
+      if (res.success && res.user) {
+        setUser(res.user);
+        localStorage.setItem(USER_KEY, JSON.stringify(res.user));
+      } else {
+        // Token invalid or expired
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(USER_KEY);
+        setToken(null);
         setUser(null);
       }
     } catch (err) {
+      setServerConnected(false);
       console.warn('Auth verification fallback:', err);
     } finally {
       setIsLoading(false);
@@ -67,7 +75,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   useEffect(() => {
-    verifyTokenAndServer();
+    // Validate a cached session in the background. Anonymous visitors render
+    // immediately because verifyTokenAndServer exits without a network call.
+    void verifyTokenAndServer();
+
+    // Health is informational only and must never gate the first paint.
+    void authApi.checkHealth().then(setServerConnected);
+
     // Re-check server health periodically every 30 seconds
     const interval = setInterval(async () => {
       const ok = await authApi.checkHealth();

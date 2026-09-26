@@ -18,19 +18,27 @@ const MONGODB_URI =
 
 // Global cached connection for Serverless
 let isDbConnected = false;
+let dbConnectionPromise: Promise<void> | null = null;
 async function connectDB() {
   if (isDbConnected || mongoose.connection.readyState === 1) {
     return;
   }
-  try {
-    await mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-    });
-    isDbConnected = true;
-  } catch (err) {
-    console.error('MongoDB Atlas Connection Error:', err);
-    throw err;
+  if (!dbConnectionPromise) {
+    dbConnectionPromise = mongoose
+      .connect(MONGODB_URI, {
+        bufferCommands: false,
+        serverSelectionTimeoutMS: 5000,
+      })
+      .then(() => {
+        isDbConnected = true;
+      })
+      .catch((err) => {
+        dbConnectionPromise = null;
+        console.error('MongoDB Atlas Connection Error:', err);
+        throw err;
+      });
   }
+  await dbConnectionPromise;
 }
 
 // Middleware
@@ -45,17 +53,8 @@ app.use(
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Ensure DB connected on every request without crashing if IP not whitelisted
-app.use(async (_req, _res, next) => {
-  try {
-    await connectDB();
-  } catch (err) {
-    console.warn('MongoDB Atlas connection deferred:', (err as any).message);
-  }
-  next();
-});
-
-// Health check
+// Health is intentionally independent from MongoDB. It is used by the
+// frontend as an informational probe and must stay fast during cold starts.
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
@@ -64,6 +63,16 @@ app.get('/api/health', (_req, res) => {
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString(),
   });
+});
+
+// Ensure DB connected on every request without crashing if IP not whitelisted
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+  } catch (err) {
+    console.warn('MongoDB Atlas connection deferred:', (err as any).message);
+  }
+  next();
 });
 
 // Auth Routes

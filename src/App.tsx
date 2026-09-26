@@ -3,26 +3,57 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { SimulationProvider, useSimulation } from './context/SimulationContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { DemoTourBar } from './components/DemoTourBar';
-import { HomeScreen } from './components/HomeScreen';
-import { ComparisonScreen } from './components/ComparisonScreen';
-import { TrackingScreen } from './components/TrackingScreen';
-import { AlertsScreen } from './components/AlertsScreen';
-import { AIDetailsScreen } from './components/AIDetailsScreen';
-import { HistoryScreen } from './components/HistoryScreen';
 import { SimulationModal } from './components/SimulationModal';
 import { ToastContainer } from './components/ToastContainer';
 import { OneHandedQuickDial } from './components/OneHandedQuickDial';
 import { OneHandedShortcutsModal } from './components/OneHandedShortcutsModal';
-import { ThreeSplashAnimation } from './components/ThreeSplashAnimation';
-import { AuthScreen } from './components/AuthScreen';
 import { useTouchSwipe } from './hooks/useTouchSwipe';
 import { Sliders, Sparkles, Heart, School, Smartphone, ArrowRight, ArrowLeft } from 'lucide-react';
+
+// Keep the first paint small: the login flow does not need the dashboard,
+// charts, or the 3D splash screen yet.
+const AuthScreen = lazy(() =>
+  import('./components/AuthScreen').then(({ AuthScreen }) => ({ default: AuthScreen })),
+);
+const ThreeSplashAnimation = lazy(() =>
+  import('./components/ThreeSplashAnimation').then(({ ThreeSplashAnimation }) => ({ default: ThreeSplashAnimation })),
+);
+const HomeScreen = lazy(() =>
+  import('./components/HomeScreen').then(({ HomeScreen }) => ({ default: HomeScreen })),
+);
+const ComparisonScreen = lazy(() =>
+  import('./components/ComparisonScreen').then(({ ComparisonScreen }) => ({ default: ComparisonScreen })),
+);
+const TrackingScreen = lazy(() =>
+  import('./components/TrackingScreen').then(({ TrackingScreen }) => ({ default: TrackingScreen })),
+);
+const AlertsScreen = lazy(() =>
+  import('./components/AlertsScreen').then(({ AlertsScreen }) => ({ default: AlertsScreen })),
+);
+const AIDetailsScreen = lazy(() =>
+  import('./components/AIDetailsScreen').then(({ AIDetailsScreen }) => ({ default: AIDetailsScreen })),
+);
+const HistoryScreen = lazy(() =>
+  import('./components/HistoryScreen').then(({ HistoryScreen }) => ({ default: HistoryScreen })),
+);
+
+const AuthFallback = () => (
+  <div className="min-h-screen bg-slate-950 flex items-center justify-center text-slate-300 font-sans">
+    <div className="animate-pulse text-sm">Đang mở màn hình đăng nhập…</div>
+  </div>
+);
+
+const ScreenFallback = () => (
+  <div className="min-h-[40vh] flex items-center justify-center text-slate-400 text-sm">
+    Đang tải màn hình…
+  </div>
+);
 
 const AppContent: React.FC = () => {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
@@ -154,28 +185,36 @@ const AppContent: React.FC = () => {
   // If not authenticated and user hasn't explicitly chosen guest mode, show the 3D AuthScreen
   if (!isAuthLoading && !isAuthenticated && !hasSkippedAuth) {
     return (
-      <AuthScreen
-        onAuthenticated={() => {
-          setHasSkippedAuth(true);
-          setShowSplash(true);
-        }}
-      />
+      <Suspense fallback={<AuthFallback />}>
+        <AuthScreen
+          onAuthenticated={() => {
+            setHasSkippedAuth(true);
+            setShowSplash(true);
+          }}
+        />
+      </Suspense>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-36 md:pb-24 select-text">
       {/* 3D Three.js Interactive Splash Animation */}
-      {showSplash && <ThreeSplashAnimation onComplete={() => setShowSplash(false)} />}
+      {showSplash && (
+        <Suspense fallback={null}>
+          <ThreeSplashAnimation onComplete={() => setShowSplash(false)} />
+        </Suspense>
+      )}
 
       {/* Modal AuthScreen if guest user clicks 'Đăng nhập' from Header */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <AuthScreen
-            onAuthenticated={() => {
-              setShowAuthModal(false);
-            }}
-          />
+          <Suspense fallback={<AuthFallback />}>
+            <AuthScreen
+              onAuthenticated={() => {
+                setShowAuthModal(false);
+              }}
+            />
+          </Suspense>
           <button
             onClick={() => setShowAuthModal(false)}
             className="absolute top-5 right-5 z-50 px-3 py-1.5 rounded-full bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-semibold backdrop-blur-md"
@@ -199,12 +238,14 @@ const AppContent: React.FC = () => {
 
       {/* Main Screen Container with Touch Gestures Enabled */}
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-4 md:py-6">
-        {activeTab === 'home' && <HomeScreen />}
-        {activeTab === 'compare' && <ComparisonScreen />}
-        {activeTab === 'track' && <TrackingScreen />}
-        {activeTab === 'alerts' && <AlertsScreen />}
-        {activeTab === 'ai_details' && <AIDetailsScreen />}
-        {activeTab === 'history' && <HistoryScreen />}
+        <Suspense fallback={<ScreenFallback />}>
+          {activeTab === 'home' && <HomeScreen />}
+          {activeTab === 'compare' && <ComparisonScreen />}
+          {activeTab === 'track' && <TrackingScreen />}
+          {activeTab === 'alerts' && <AlertsScreen />}
+          {activeTab === 'ai_details' && <AIDetailsScreen />}
+          {activeTab === 'history' && <HistoryScreen />}
+        </Suspense>
 
         {/* Mobile Swipe Gesture Helper Bar */}
         <div className="mt-8 md:hidden flex items-center justify-between px-3 py-2 rounded-2xl bg-slate-900/70 border border-slate-800 text-[11px] text-slate-400">

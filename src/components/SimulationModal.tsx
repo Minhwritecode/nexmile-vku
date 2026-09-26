@@ -15,6 +15,7 @@ import {
   Bus,
   CheckCircle2,
   PlayCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { useSimulation } from '../context/SimulationContext';
 

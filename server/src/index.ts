@@ -18,29 +18,26 @@ const MONGODB_URI =
 
 // Global cached connection for Serverless / Express
 let isDbConnected = false;
+let dbConnectionPromise: Promise<void> | null = null;
 export const connectDB = async (): Promise<void> => {
   if (isDbConnected || mongoose.connection.readyState === 1) {
     return;
   }
-  try {
-    await mongoose.connect(MONGODB_URI);
-    isDbConnected = true;
-    console.log('✅ MongoDB Atlas kết nối thành công!');
-  } catch (error) {
-    console.error('❌ Lỗi kết nối MongoDB Atlas:', error);
-    throw error;
+  if (!dbConnectionPromise) {
+    dbConnectionPromise = mongoose
+      .connect(MONGODB_URI, { serverSelectionTimeoutMS: 5000 })
+      .then(() => {
+        isDbConnected = true;
+        console.log('✅ MongoDB Atlas kết nối thành công!');
+      })
+      .catch((error) => {
+        dbConnectionPromise = null;
+        console.error('❌ Lỗi kết nối MongoDB Atlas:', error);
+        throw error;
+      });
   }
+  await dbConnectionPromise;
 };
-
-// Middleware: ensure DB is connected for every request
-app.use(async (_req, _res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
 
 // Middleware: permissive CORS for local dev and Vercel domains
 app.use(
@@ -54,10 +51,8 @@ app.use(
 app.use(express.json({ limit: '50kb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
-app.use('/api/auth', authRoutes);
-
-// Health check
+// Health is independent from MongoDB so monitoring and the frontend do not
+// wait for a database cold start.
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
@@ -68,18 +63,29 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+// Auth requests still require a live database connection.
+app.use(async (_req, _res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Routes
+app.use('/api/auth', authRoutes);
+
 // Only listen on port if running as standalone server (not on Vercel)
 if (process.env.VERCEL !== '1' && process.env.NODE_ENV !== 'test') {
-  connectDB()
-    .then(() => {
-      app.listen(PORT, () => {
-        console.log(`🚀 NexMile Auth Server chạy tại http://localhost:${PORT}`);
-        console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
-      });
-    })
-    .catch((err) => {
-      console.error('Không thể khởi động server:', err);
-    });
+  app.listen(PORT, () => {
+    console.log(`🚀 NexMile Auth Server chạy tại http://localhost:${PORT}`);
+    console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
+  });
+  // Warm the connection in the background without delaying server readiness.
+  void connectDB().catch((err) => {
+    console.error('Không thể kết nối MongoDB lúc khởi động:', err);
+  });
 }
 
 export default app;
