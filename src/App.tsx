@@ -6,6 +6,7 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { SimulationProvider, useSimulation } from './context/SimulationContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { DemoTourBar } from './components/DemoTourBar';
@@ -317,10 +318,12 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <SimulationProvider>
-        <AppContent />
-      </SimulationProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <SimulationProvider>
+          <AppContent />
+        </SimulationProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

@@ -138,8 +138,8 @@ export interface TripHistoryItem {
   predictedArrival: string; // e.g. "07:42"
   actualArrival: string; // e.g. "07:40"
   targetClassTime: string; // e.g. "07:45"
-  costVnd: number; // 5000 or 20000
-  costSavedVnd: number; // e.g. 15000 vs motorbike
+  costVnd: number; // 8000 (bus) or 18000 (motorbike)
+  costSavedVnd: number; // e.g. 10000 vs motorbike
   co2SavedKg: number; // e.g. 1.2 kg
   aiPredictionAccuracyPercent: number; // e.g. 96%
   isOnTime: boolean;

@@ -7,15 +7,18 @@ import {
   RotateCcw,
   CloudRain,
   Sun,
+  Moon,
   Cloud,
   CloudLightning,
   Activity,
   ShieldCheck,
   Hand,
   Smartphone,
+  RefreshCw,
 } from 'lucide-react';
 import { useSimulation } from '../context/SimulationContext';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { WeatherCondition } from '../types';
 
 interface HeaderProps {
@@ -24,6 +27,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
   const { user, logout } = useAuth();
+  const { theme, toggleTheme, isDark } = useTheme();
   const {
     weather,
     vkuWeather,
@@ -36,6 +40,9 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
     jumpToDemoStep,
     allAnomalies,
     setIsGesturesModalOpen,
+    isRealtimeWeatherActive,
+    isWeatherLoading,
+    syncRealtimeWeather,
   } = useSimulation();
 
   const [currentTime, setCurrentTime] = useState('');
@@ -115,32 +122,72 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
           </div>
 
           {/* Weather Quick Switch connected to VKU Campus Station */}
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleCycleWeather}
+              title={`Trạm Khí tượng VKU: ${vkuWeather.conditionLabel} (${vkuWeather.temperatureC}°C). ${
+                isRealtimeWeatherActive ? 'Đang lấy dữ liệu thật Realtime Open-Meteo.' : 'Chế độ mô phỏng.'
+              } Bấm để đổi điều kiện.`}
+              className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm ${
+                weather === 'sunny'
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
+                  : weather === 'cloudy'
+                  ? 'bg-slate-800 border-slate-600 text-slate-200 hover:bg-slate-700'
+                  : weather === 'rain'
+                  ? 'bg-blue-500/20 border-blue-500/40 text-blue-300 hover:bg-blue-500/30'
+                  : 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/30 ring-1 ring-cyan-500/30'
+              }`}
+            >
+              {weather === 'sunny' ? (
+                <Sun className="w-4 h-4 text-amber-400 shrink-0" />
+              ) : weather === 'cloudy' ? (
+                <Cloud className="w-4 h-4 text-slate-300 shrink-0" />
+              ) : weather === 'rain' ? (
+                <CloudRain className="w-4 h-4 text-blue-400 shrink-0" />
+              ) : (
+                <CloudLightning className="w-4 h-4 text-cyan-400 shrink-0 animate-bounce" />
+              )}
+              <span className="hidden sm:inline text-[11px] font-semibold">
+                VKU: {vkuWeather.temperatureC}°C
+              </span>
+              <span className="sm:hidden text-[10px] font-mono">{vkuWeather.temperatureC}°</span>
+
+              {isRealtimeWeatherActive && (
+                <span className="hidden lg:inline-block text-[9px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
+                  Realtime
+                </span>
+              )}
+            </button>
+
+            {/* Quick sync realtime weather button */}
+            <button
+              onClick={syncRealtimeWeather}
+              disabled={isWeatherLoading}
+              title="Đồng bộ thời tiết Realtime từ vệ tinh Open-Meteo"
+              className="hidden xl:flex p-1.5 rounded-lg bg-slate-800/80 border border-slate-700/80 text-slate-400 hover:text-emerald-400 hover:bg-slate-700 transition"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isWeatherLoading ? 'animate-spin text-emerald-400' : ''}`} />
+            </button>
+          </div>
+
+          {/* Dark / Light Mode Switcher Button */}
           <button
-            onClick={handleCycleWeather}
-            title={`Trạm Khí tượng VKU: ${vkuWeather.conditionLabel} (${vkuWeather.temperatureC}°C). Bấm để chuyển đổi thời tiết mô phỏng.`}
-            className={`p-1.5 sm:px-2.5 sm:py-1 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition-all shadow-sm ${
-              weather === 'sunny'
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20'
-                : weather === 'cloudy'
-                ? 'bg-slate-800 border-slate-600 text-slate-200 hover:bg-slate-700'
-                : weather === 'rain'
-                ? 'bg-blue-500/20 border-blue-500/40 text-blue-300 hover:bg-blue-500/30'
-                : 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300 hover:bg-cyan-500/30 ring-1 ring-cyan-500/30'
+            onClick={toggleTheme}
+            title={isDark ? 'Chuyển sang giao diện Sáng (Light Mode)' : 'Chuyển sang giao diện Tối (Dark Mode)'}
+            className={`px-2.5 py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all shadow-sm ${
+              isDark
+                ? 'bg-slate-800/90 border-slate-700/80 text-amber-300 hover:bg-slate-700 hover:text-amber-200'
+                : 'bg-amber-500/15 border-amber-500/40 text-amber-800 hover:bg-amber-500/25'
             }`}
           >
-            {weather === 'sunny' ? (
+            {isDark ? (
               <Sun className="w-4 h-4 text-amber-400 shrink-0" />
-            ) : weather === 'cloudy' ? (
-              <Cloud className="w-4 h-4 text-slate-300 shrink-0" />
-            ) : weather === 'rain' ? (
-              <CloudRain className="w-4 h-4 text-blue-400 shrink-0" />
             ) : (
-              <CloudLightning className="w-4 h-4 text-cyan-400 shrink-0 animate-bounce" />
+              <Moon className="w-4 h-4 text-indigo-600 shrink-0" />
             )}
-            <span className="hidden sm:inline text-[11px] font-semibold">
-              VKU: {vkuWeather.temperatureC}°C
+            <span className="hidden sm:inline text-[11px]">
+              {isDark ? 'Sáng' : 'Tối'}
             </span>
-            <span className="sm:hidden text-[10px] font-mono">{vkuWeather.temperatureC}°</span>
           </button>
 
           {/* Guided Demo Launch Button */}

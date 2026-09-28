@@ -56,7 +56,7 @@ export const HomeScreen: React.FC = () => {
     {
       id: 'cheapest',
       title: 'Tiết kiệm nhất',
-      desc: 'Vé buýt sinh viên chỉ 5.000đ',
+      desc: 'Vé buýt Phương Trang chỉ 8.000đ',
       icon: DollarSign,
       color: 'emerald',
     },

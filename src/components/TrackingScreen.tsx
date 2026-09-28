@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Bus,
   MapPin,
@@ -15,6 +15,14 @@ import {
   ArrowRight,
   Maximize2,
   Sliders,
+  Building2,
+  Phone,
+  ExternalLink,
+  Calendar,
+  Users,
+  Info,
+  ChevronRight,
+  Compass,
 } from 'lucide-react';
 import { useSimulation } from '../context/SimulationContext';
 import { ROUTE_6_STOPS, ROUTE_13_STOPS } from '../data/mockRoutes';
@@ -33,10 +41,17 @@ export const TrackingScreen: React.FC = () => {
     simulateFounderIncident,
     traffic,
     weather,
+    futaStations,
+    futaRoutes,
+    getRealtimeFutaDepartures,
   } = useSimulation();
+
+  const [activeTrackingSubTab, setActiveTrackingSubTab] = useState<'stops' | 'realtime_trips' | 'futa_stations'>('stops');
 
   const isR13 = selectedTrackingRoute === 'route_13';
   const currentTelemetry = isR13 ? route13Telemetry : route6Telemetry;
+  const currentFutaRoute = futaRoutes[selectedTrackingRoute];
+  const realtimeDepartures = getRealtimeFutaDepartures(selectedTrackingRoute);
   const stops = isR13 ? ROUTE_13_STOPS : ROUTE_6_STOPS;
   const userStop = stops.find((s) => s.isUserStop) || stops[5];
   const userSensor = sensors[userStop.sensorId] || {
@@ -80,24 +95,107 @@ export const TrackingScreen: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono text-slate-400">
-          <span className="hidden sm:inline bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">
-            Dữ liệu mô phỏng cho prototype
+          <span className="hidden sm:inline bg-orange-500/20 text-orange-300 border border-orange-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">
+            FUTA Bus Lines • Danabus
           </span>
-          <span className="hidden md:inline">Xe mang số: <strong className="text-white">{isR13 ? '43B-013.88' : '43B-006.12'}</strong></span>
+          <span className="hidden md:inline">Xe phụ trách: <strong className="text-white">{isR13 ? '43B-013.88' : '43B-006.12'}</strong></span>
         </div>
       </div>
 
-      {/* Main ETA & Status Telemetry Card (Layer 2 AI) */}
-      <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-5 md:p-6 shadow-xl space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-          <div className="flex items-start gap-3">
-            <div
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
-                isR13 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-              }`}
-            >
-              <Bus className="w-6 h-6" />
+      {/* Official FUTA Bus Lines Authority Banner */}
+      <div className="bg-gradient-to-r from-orange-500/15 via-slate-900 to-emerald-500/10 rounded-2xl border border-orange-500/30 p-3 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-orange-600 flex items-center justify-center text-white font-black text-sm shrink-0 shadow-md shadow-orange-950/40">
+            FUTA
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-orange-400 uppercase tracking-wider">
+                Hãng xe Phương Trang (FUTA Bus Lines) • Danabus
+              </span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-orange-500/20 text-orange-300 font-mono border border-orange-500/30 font-semibold">
+                Dữ liệu chính thức
+              </span>
             </div>
+            <p className="text-[11px] text-slate-300 mt-0.5">
+              Vận hành các tuyến buýt trợ giá sinh viên VKU (Tuyến 06 & 13) • 05:30 – 19:00 hàng ngày • Vé HSSV: 5.000đ/lượt
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs">
+          <a
+            href="tel:19006067"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 border border-orange-500/40 font-bold transition shadow-sm"
+          >
+            <Phone className="w-3.5 h-3.5 text-orange-400" />
+            <span>1900 6067</span>
+          </a>
+          <a
+            href="https://futabus.vn"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold transition"
+          >
+            <span>futabus.vn</span>
+            <ExternalLink className="w-3 h-3 text-slate-400" />
+          </a>
+        </div>
+      </div>
+
+      {/* Sub-view switcher tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-2 overflow-x-auto scrollbar-none">
+        <button
+          onClick={() => setActiveTrackingSubTab('stops')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+            activeTrackingSubTab === 'stops'
+              ? 'bg-slate-800 text-emerald-400 border border-emerald-500/40 shadow-sm'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <MapPin className="w-3.5 h-3.5" />
+          <span>Lộ trình trạm & Cảm biến IoT</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTrackingSubTab('realtime_trips')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+            activeTrackingSubTab === 'realtime_trips'
+              ? 'bg-slate-800 text-orange-400 border border-orange-500/40 shadow-sm'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5" />
+          <span>Chuyến xe FUTA Realtime ({currentFutaRoute.peakHeadwayMinutes}p/chuyến)</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTrackingSubTab('futa_stations')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+            activeTrackingSubTab === 'futa_stations'
+              ? 'bg-slate-800 text-blue-400 border border-blue-500/40 shadow-sm'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <Building2 className="w-3.5 h-3.5" />
+          <span>3 Bến xe Đà Nẵng (Phương Trang)</span>
+        </button>
+      </div>
+
+      {/* VIEW 1: STOPS & TELEMETRY */}
+      {activeTrackingSubTab === 'stops' && (
+        <>
+          {/* Main ETA & Status Telemetry Card (Layer 2 AI) */}
+          <div className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-800 p-5 md:p-6 shadow-xl space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+              <div className="flex items-start gap-3">
+                <div
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+                    isR13 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  }`}
+                >
+                  <Bus className="w-6 h-6" />
+                </div>
 
             <div>
               <div className="flex items-center gap-2">
@@ -404,10 +502,252 @@ export const TrackingScreen: React.FC = () => {
             </div>
           </div>
           <span className="text-[11px] text-slate-400 italic">
-            *Dữ liệu tọa độ và cảm biến được cập nhật liên tục theo mô phỏng
+            *Dữ liệu lộ trình và điểm dừng theo thông tin chuẩn từ Danabus & FUTA Bus Lines
           </span>
         </div>
       </div>
+        </>
+      )}
+
+      {/* VIEW 2: REAL-TIME FUTA DEPARTURES */}
+      {activeTrackingSubTab === 'realtime_trips' && (
+        <div className="space-y-4">
+          {/* Header Card for Route Schedule */}
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 border border-slate-800 rounded-3xl p-5 shadow-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-800 pb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-orange-500/20 text-orange-300 font-bold text-xs border border-orange-500/30">
+                    FUTA City Bus
+                  </span>
+                  <h3 className="text-lg font-black text-white">
+                    Biểu đồ giờ các chuyến xe tiếp theo ({currentFutaRoute.routeNumber})
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-300 mt-1">
+                  Đơn vị khai thác: <strong className="text-orange-400">{currentFutaRoute.operator}</strong> • Tần suất: {currentFutaRoute.peakHeadwayMinutes} phút/chuyến
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs">
+                <span className="bg-emerald-500/15 text-emerald-300 px-2.5 py-1 rounded-xl border border-emerald-500/30 font-semibold font-mono">
+                  Giá vé: {currentFutaRoute.studentFareVnd.toLocaleString('vi-VN')}đ/lượt
+                </span>
+                <span className="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-xl border border-slate-700 font-semibold">
+                  {currentFutaRoute.operatingHours}
+                </span>
+              </div>
+            </div>
+
+            {/* List of upcoming real-time departures */}
+            <div className="pt-4 space-y-3">
+              <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+                <span>Điểm đón mục tiêu của bạn: <strong className="text-white font-semibold">{userStop.name}</strong></span>
+                <span className="font-mono text-emerald-400 flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Thời gian thực
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {realtimeDepartures.map((trip, idx) => (
+                  <div
+                    key={idx}
+                    className={`rounded-2xl p-4 border transition-all ${
+                      idx === 0
+                        ? 'bg-gradient-to-r from-orange-500/10 via-slate-800 to-slate-800 border-orange-500/40 shadow-lg'
+                        : 'bg-slate-800/70 border-slate-700/70 hover:border-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs ${
+                          idx === 0 ? 'bg-orange-500 text-white' : 'bg-slate-700 text-slate-300'
+                        }`}>
+                          #{idx + 1}
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-white block">
+                            Xe {trip.plateNumber}
+                          </span>
+                          <span className="text-[10px] text-slate-400">
+                            Tài xế: {trip.driverName}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                        trip.status === 'approaching'
+                          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 animate-pulse'
+                          : trip.status === 'departing'
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                          : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                      }`}>
+                        {trip.status === 'approaching'
+                          ? 'Sắp đến trạm'
+                          : trip.status === 'departing'
+                          ? 'Đang trên đường'
+                          : 'Đúng giờ'}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-700/60 text-xs">
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Xuất bến đầu</span>
+                        <span className="font-mono font-bold text-slate-200">{trip.departureTime}</span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] text-slate-400 block">Dự kiến đến trạm đón</span>
+                        <span className="font-mono font-bold text-emerald-400 text-sm">
+                          {trip.estimatedArrivalAtUserStop}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-2.5 flex items-center justify-between text-xs">
+                      <span className="text-[11px] text-slate-300 font-medium">
+                        Ước tính: còn <strong className="text-orange-400 font-mono font-bold">{trip.minutesRemaining} phút</strong>
+                      </span>
+                      <span className="text-[10px] text-slate-400">
+                        Độ lấp đầy: {trip.occupancyPercent}%
+                      </span>
+                    </div>
+
+                    {/* Progress occupancy bar */}
+                    <div className="w-full bg-slate-700 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${
+                          trip.occupancyPercent > 75 ? 'bg-amber-400' : 'bg-emerald-400'
+                        }`}
+                        style={{ width: `${trip.occupancyPercent}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Official Support hotline bar */}
+            <div className="mt-4 pt-3 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-400">
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-orange-400" />
+                <span>Tổng đài giải đáp thắc mắc xe buýt FUTA: <strong>1900 6067</strong> (Bấm phím 1)</span>
+              </div>
+              <a
+                href="https://futabus.vn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1"
+              >
+                <span>Xem trên futabus.vn</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* VIEW 3: 3 OFFICIAL DA NANG BUS STATIONS */}
+      {activeTrackingSubTab === 'futa_stations' && (
+        <div className="space-y-4">
+          <div className="bg-gradient-to-r from-blue-500/10 via-slate-900 to-indigo-500/10 border border-blue-500/30 rounded-2xl p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-md">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">
+                  Hệ thống 3 Bến xe chính thức TP Đà Nẵng & Nhà xe Phương Trang
+                </h3>
+                <p className="text-xs text-slate-300">
+                  Thông tin chuẩn xác về địa chỉ, hotline điều hành, và mạng lưới kết nối đến ĐH VKU
+                </p>
+              </div>
+            </div>
+            <span className="hidden sm:inline text-xs font-mono bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg border border-blue-500/30">
+              Đà Nẵng • 2026
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {futaStations.map((station) => (
+              <div
+                key={station.id}
+                className="bg-slate-900/90 rounded-3xl border border-slate-800 hover:border-slate-700 p-5 shadow-xl flex flex-col justify-between transition-all"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-blue-500/20 text-blue-300 text-[10px] font-bold border border-blue-500/30">
+                      Bến xe Đà Nẵng
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold">
+                      Cách VKU {station.distanceToVkuKm} km
+                    </span>
+                  </div>
+
+                  <h4 className="text-base font-bold text-white leading-snug">
+                    {station.name}
+                  </h4>
+
+                  <div className="text-xs text-slate-300 space-y-1.5">
+                    <div className="flex items-start gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                      <span>{station.address}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <Phone className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                      <span>Hotline: <strong className="text-white">{station.phone}</strong> (FUTA: {station.hotlineFuta})</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Giờ hoạt động: {station.operatingHours}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-400 bg-slate-800/60 p-2.5 rounded-xl border border-slate-700/60 leading-relaxed">
+                    {station.futaRole}
+                  </p>
+
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block mb-1">
+                      Tuyến kết nối nổi bật
+                    </span>
+                    <ul className="text-xs text-slate-300 space-y-1">
+                      {station.connectingRoutes.slice(0, 2).map((routeStr, i) => (
+                        <li key={i} className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"></span>
+                          <span className="truncate">{routeStr}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="pt-4 mt-3 border-t border-slate-800 flex items-center justify-between">
+                  <a
+                    href={`tel:${station.hotlineFuta}`}
+                    className="text-xs text-orange-400 hover:text-orange-300 font-bold flex items-center gap-1"
+                  >
+                    <Phone className="w-3 h-3" />
+                    <span>Gọi FUTA</span>
+                  </a>
+                  <a
+                    href={station.officialWebUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1"
+                  >
+                    <span>Trang chủ FUTA</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

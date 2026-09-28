@@ -37,3 +37,104 @@
     transform: translateY(0);
   }
 }
+
+/* ===== Light Mode Theme Overrides (Default remains Dark) ===== */
+html.light {
+  color-scheme: light;
+}
+
+html.light body,
+html.light body.light-theme {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+html.light .bg-slate-950 {
+  background-color: #f8fafc !important;
+}
+
+html.light .bg-slate-900 {
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+}
+
+html.light header.sticky {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+html.light .bg-slate-900\/95,
+html.light .bg-slate-900\/90,
+html.light .bg-slate-900\/80,
+html.light .bg-slate-900\/70,
+html.light .bg-slate-900\/60 {
+  background-color: rgba(255, 255, 255, 0.94) !important;
+}
+
+html.light .bg-slate-800 {
+  background-color: #f1f5f9 !important;
+}
+
+html.light .bg-slate-800\/90,
+html.light .bg-slate-800\/80,
+html.light .bg-slate-800\/70,
+html.light .bg-slate-800\/60,
+html.light .bg-slate-800\/50 {
+  background-color: rgba(241, 245, 249, 0.9) !important;
+}
+
+html.light .border-slate-800,
+html.light .border-slate-800\/80,
+html.light .border-slate-700,
+html.light .border-slate-700\/80,
+html.light .border-slate-700\/60,
+html.light .border-slate-700\/50,
+html.light .border-slate-600 {
+  border-color: #e2e8f0 !important;
+}
+
+/* Light mode text colors */
+html.light .text-slate-100 {
+  color: #0f172a !important;
+}
+
+html.light .text-slate-200 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-300 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-400 {
+  color: #64748b !important;
+}
+
+/* Preserve bright text inside action buttons & colored pills */
+html.light .bg-emerald-600,
+html.light .bg-emerald-500,
+html.light .bg-blue-600,
+html.light .bg-blue-500,
+html.light .bg-rose-500,
+html.light .bg-amber-500,
+html.light .bg-teal-600,
+html.light .bg-cyan-600,
+html.light [class*="bg-gradient-to-"] .text-white {
+  color: #ffffff !important;
+}
+
+html.light button.bg-emerald-600 span,
+html.light button.bg-blue-600 span,
+html.light .bg-emerald-600 .text-white,
+html.light .bg-blue-600 .text-white {
+  color: #ffffff !important;
+}
+
+/* Subtle cards hover on light mode */
+html.light .hover\:bg-slate-800:hover {
+  background-color: #e2e8f0 !important;
+}
+
+html.light .hover\:bg-slate-700:hover {
+  background-color: #cbd5e1 !important;
+}

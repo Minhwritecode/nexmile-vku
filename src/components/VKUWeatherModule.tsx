@@ -16,6 +16,7 @@ import {
   Clock,
   Gauge,
   Info,
+  RefreshCw,
 } from 'lucide-react';
 import { useSimulation } from '../context/SimulationContext';
 import { WeatherCondition } from '../types';
@@ -25,7 +26,14 @@ interface VKUWeatherModuleProps {
 }
 
 export const VKUWeatherModule: React.FC<VKUWeatherModuleProps> = ({ compact = false }) => {
-  const { vkuWeather, changeWeather, setActiveTab } = useSimulation();
+  const {
+    vkuWeather,
+    changeWeather,
+    setActiveTab,
+    isRealtimeWeatherActive,
+    isWeatherLoading,
+    syncRealtimeWeather,
+  } = useSimulation();
   const [showHourly, setShowHourly] = useState(false);
 
   const getWeatherIcon = (cond: WeatherCondition, size: 'sm' | 'md' | 'lg' = 'md') => {
@@ -112,31 +120,53 @@ export const VKUWeatherModule: React.FC<VKUWeatherModuleProps> = ({ compact = fa
               <h3 className="text-xs font-bold text-white uppercase tracking-wider">
                 Trạm Khí tượng VKU (Hòa Quý • Ngũ Hành Sơn)
               </h3>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              {isRealtimeWeatherActive ? (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Real-time Open-Meteo
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Mô phỏng dữ liệu
+                </span>
+              )}
             </div>
             <p className="text-[11px] text-slate-400">
-              Quan trắc vi khí hậu khuôn viên trường phục vụ thuật toán AI
+              Quan trắc vi khí hậu thời gian thực phục vụ thuật toán AI chọn chuyến
             </p>
           </div>
         </div>
 
-        {/* Flood or Weather Warning Badge */}
-        {vkuWeather.floodRisk !== 'none' && (
-          <div
-            className={`self-start sm:self-auto px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 border animate-pulse ${
-              vkuWeather.floodRisk === 'high'
-                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
-            }`}
+        <div className="flex items-center gap-2">
+          {/* Quick Realtime Sync Button */}
+          <button
+            onClick={syncRealtimeWeather}
+            disabled={isWeatherLoading}
+            title="Đồng bộ dữ liệu thời tiết thực tế từ trạm khí tượng Đà Nẵng"
+            className="px-2.5 py-1 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm"
           >
-            <ShieldAlert className="w-3.5 h-3.5" />
-            <span>
-              {vkuWeather.floodRisk === 'high'
-                ? 'Cảnh báo ngập đường Nam Kỳ Khởi Nghĩa (15-25cm)'
-                : 'Nguy cơ đọng nước đoạn rẽ vào VKU'}
-            </span>
-          </div>
-        )}
+            <RefreshCw className={`w-3.5 h-3.5 ${isWeatherLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">{isRealtimeWeatherActive ? 'Cập nhật Realtime' : 'Về Realtime'}</span>
+          </button>
+
+          {/* Flood or Weather Warning Badge */}
+          {vkuWeather.floodRisk !== 'none' && (
+            <div
+              className={`self-start sm:self-auto px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 border animate-pulse ${
+                vkuWeather.floodRisk === 'high'
+                  ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
+                  : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+              }`}
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>
+                {vkuWeather.floodRisk === 'high'
+                  ? 'Cảnh báo ngập đường Nam Kỳ Khởi Nghĩa (15-25cm)'
+                  : 'Nguy cơ đọng nước đoạn rẽ vào VKU'}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Weather Information Panel */}

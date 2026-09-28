@@ -58,10 +58,80 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
-    service: 'NexMile VKU Auth API',
-    version: '1.0.0',
+    service: 'NexMile VKU Auth & FUTA Bus API',
+    version: '1.2.0',
     mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
     timestamp: new Date().toISOString(),
+  });
+});
+
+// Official FUTA Bus Lines (Phương Trang) & 3 Da Nang Stations endpoints
+app.get('/api/futa/stations', (_req, res) => {
+  res.json({
+    success: true,
+    operator: 'Công ty Cổ phần Xe khách Phương Trang (FUTA Bus Lines) • Danabus',
+    hotline: '1900 6067',
+    officialWebsite: 'https://futabus.vn',
+    stations: [
+      {
+        id: 'station_central',
+        name: 'Bến xe Trung tâm Đà Nẵng',
+        address: '185 – 201 Tôn Đức Thắng, P. Hòa Minh, Q. Liên Chiểu, TP. Đà Nẵng',
+        phone: '02363 786 786',
+        hotline: '1900 6067',
+        role: 'Bến xe chính & đầu mối điều hành xe buýt Phương Trang (FUTA Bus Lines) tại Đà Nẵng, kết nối Tuyến 06 và Tuyến 13 đến ĐH VKU.',
+        connectingRoutes: ['Tuyến 06 (BX Trung Tâm - VKU)', 'Tuyến 13', 'Tuyến nội đô 05, 07, 08, 11, 12'],
+      },
+      {
+        id: 'station_south',
+        name: 'Bến xe Phía Nam Đà Nẵng (Đức Long)',
+        address: 'Quốc lộ 1A, Xã Hòa Phước, Huyện Hòa Vang, TP. Đà Nẵng',
+        phone: '02363 688 888',
+        hotline: '1900 6067',
+        role: 'Cửa ngõ phía Nam, bến xe trung chuyển FUTA kết nối Đà Nẵng – Quảng Nam (Tam Kỳ, Hội An, Điện Bàn) phục vụ sinh viên VKU.',
+        connectingRoutes: ['Tuyến buýt liền kề FUTA Đà Nẵng - Tam Kỳ', 'Tuyến buýt phía Nam'],
+      },
+      {
+        id: 'station_north',
+        name: 'Bến xe Phía Bắc Đà Nẵng (Hòa Hiệp Nam)',
+        address: 'Đường Nam Cao nối dài giao QL1A, P. Hòa Hiệp Nam, Q. Liên Chiểu, TP. Đà Nẵng',
+        phone: '1900 6067',
+        hotline: '1900 6067',
+        role: 'Cửa ngõ Tây Bắc tiếp giáp đèo Hải Vân và Khu công nghệ cao, trạm trung chuyển xe buýt FUTA kết nối Bách Khoa và VKU.',
+        connectingRoutes: ['Tuyến buýt Bắc - Nam nội đô', 'Tuyến xe buýt trợ giá FUTA'],
+      },
+    ],
+  });
+});
+
+app.get('/api/futa/routes', (_req, res) => {
+  res.json({
+    success: true,
+    operator: 'FUTA Bus Lines',
+    routes: [
+      {
+        routeId: 'route_13',
+        routeNumber: '13',
+        routeName: 'Tuyến 13: Bệnh viện Ung Bướu Đà Nẵng ⇄ ĐH CNTT&TT Việt - Hàn (VKU)',
+        hotline: '1900 6067',
+        studentFareVnd: 5000,
+        standardFareVnd: 8000,
+        operatingHours: '05:30 – 19:00',
+        headwayMinutes: 15,
+        fleetCount: 4,
+      },
+      {
+        routeId: 'route_6',
+        routeNumber: '06',
+        routeName: 'Tuyến 06: Bến xe Trung tâm Đà Nẵng / Sân bay ⇄ ĐH CNTT&TT Việt - Hàn (VKU)',
+        hotline: '1900 6067',
+        studentFareVnd: 5000,
+        standardFareVnd: 8000,
+        operatingHours: '05:30 – 19:00',
+        headwayMinutes: 20,
+        fleetCount: 3,
+      },
+    ],
   });
 });
 

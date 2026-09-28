@@ -357,14 +357,14 @@ export function compareBusAndMotorbike(
       waitingTimeMinutesRange: [r6Telemetry.estimatedArrivalMinMinutes, r6Telemetry.estimatedArrivalMaxMinutes],
       transitTimeMinutes: r6Transit,
       walkingTimeMinutes: r6Walk,
-      estimatedCostVnd: 5000,
+      estimatedCostVnd: 8000,
       onTimeProbabilityPercent: r6OnTime,
       confidencePercent: r6Conf,
       leaveHomeTime: r6Leave,
       arrivalTime: r6Arrive,
       parkingTimeMinutes: 0,
       pros: [
-        'Tiết kiệm chi phí (5.000đ/lượt)',
+        'Tiết kiệm chi phí (8.000đ/lượt)',
         'Xuống ngay sảnh cổng chính VKU có mái che',
         weather === 'heavy_rain' ? 'Tránh hoàn toàn ngập úng đường Nam Kỳ Khởi Nghĩa' : 'Khoang xe máy lạnh 24°C, an toàn',
       ],
@@ -392,7 +392,7 @@ export function compareBusAndMotorbike(
       waitingTimeMinutesRange: [r13Telemetry.estimatedArrivalMinMinutes, r13Telemetry.estimatedArrivalMaxMinutes],
       transitTimeMinutes: r13Transit,
       walkingTimeMinutes: r13Walk,
-      estimatedCostVnd: 5000,
+      estimatedCostVnd: 8000,
       onTimeProbabilityPercent: r13OnTime,
       confidencePercent: r13Conf,
       leaveHomeTime: r13Leave,
@@ -400,7 +400,7 @@ export function compareBusAndMotorbike(
       parkingTimeMinutes: 0,
       pros: [
         'Độ tin cậy cao, ít biến động',
-        'Tiết kiệm chi phí tối đa (5.000đ)',
+        'Tiết kiệm chi phí tối đa (8.000đ)',
         weather === 'heavy_rain'
           ? 'Xe buýt bảo vệ 100% đồ dùng điện tử & laptop'
           : 'Đến cổng VKU đúng giờ, không lo gửi xe',

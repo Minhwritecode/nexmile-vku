@@ -14,6 +14,15 @@ import {
 import { ROUTE_6_STOPS, ROUTE_13_STOPS, INITIAL_SENSORS } from '../data/mockRoutes';
 import { VKU_WEATHER_PRESETS } from '../data/mockWeather';
 import { MOCK_TRIP_HISTORY } from '../data/mockHistory';
+import { fetchRealtimeVkuWeather } from '../services/realtimeWeather';
+import {
+  DA_NANG_3_BUS_STATIONS,
+  FUTA_VKU_ROUTES,
+  getRealtimeFutaDepartures,
+  FutaBusStation,
+  FutaRouteDetails,
+  RealtimeTripDeparture,
+} from '../services/futaService';
 import {
   predictBusArrival,
   detectBusAnomaly,
@@ -63,6 +72,14 @@ interface SimulationContextType {
   setWeather: (val: WeatherCondition) => void;
   vkuWeather: VKUWeatherData;
   changeWeather: (val: WeatherCondition) => void;
+  isRealtimeWeatherActive: boolean;
+  isWeatherLoading: boolean;
+  syncRealtimeWeather: () => Promise<void>;
+
+  // Official FUTA Bus Lines (Phương Trang) & 3 Da Nang Stations
+  futaStations: FutaBusStation[];
+  futaRoutes: Record<'route_13' | 'route_6', FutaRouteDetails>;
+  getRealtimeFutaDepartures: (routeId: 'route_13' | 'route_6') => RealtimeTripDeparture[];
 
   // AI Computed Output
   recommendation: AIRecommendationResult;
@@ -181,8 +198,8 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       predictedArrival: recommendation.expectedArrivalTime,
       actualArrival: recommendation.expectedArrivalTime,
       targetClassTime: desiredArrivalTime,
-      costVnd: isBus ? 5000 : 20000,
-      costSavedVnd: isBus ? 15000 : 0,
+      costVnd: isBus ? 8000 : 18000,
+      costSavedVnd: isBus ? 10000 : 0,
       co2SavedKg: isBus ? 1.4 : 0,
       aiPredictionAccuracyPercent: 96,
       isOnTime: true,
@@ -208,13 +225,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const nextIndex = (currentIndex + 1) % TAB_ORDER.length;
     const nextTab = TAB_ORDER[nextIndex];
     setActiveTab(nextTab);
-    addToast({
-      type: 'general',
-      title: `Cử chỉ vuốt: ${TAB_NAMES[nextTab]}`,
-      message: `Chuyển trang một tay nhanh chóng (${nextIndex + 1}/5).`,
-      severity: 'info',
-      durationMs: 2500,
-    });
+    // User requested: Tắt hẳn popup khi quẹt trái/phải, chỉ giữ lại thông báo việc quan trọng
   };
 
   const goToPrevTab = () => {
@@ -222,39 +233,16 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const prevIndex = (currentIndex - 1 + TAB_ORDER.length) % TAB_ORDER.length;
     const prevTab = TAB_ORDER[prevIndex];
     setActiveTab(prevTab);
-    addToast({
-      type: 'general',
-      title: `Cử chỉ vuốt: ${TAB_NAMES[prevTab]}`,
-      message: `Chuyển trang một tay nhanh chóng (${prevIndex + 1}/5).`,
-      severity: 'info',
-      durationMs: 2500,
-    });
+    // User requested: Tắt hẳn popup khi quẹt trái/phải, chỉ giữ lại thông báo việc quan trọng
   };
 
   const toggleHandMode = () => {
     const nextMode = handMode === 'right' ? 'left' : 'right';
     setHandMode(nextMode);
-    addToast({
-      type: 'general',
-      title: `Chế độ ngón cái: ${nextMode === 'right' ? 'Tay phải 👉' : 'Tay trái 👈'}`,
-      message: `Đã di chuyển phím điều khiển một tay sang góc dưới ${nextMode === 'right' ? 'phải' : 'trái'}.`,
-      severity: 'info',
-      durationMs: 3000,
-    });
   };
 
-  // Toast Notifications State
-  const [toasts, setToasts] = useState<ToastNotification[]>([
-    {
-      id: 'init_welcome',
-      type: 'general',
-      title: 'NexMile AI Sẵn Sàng',
-      message: 'Hệ thống đã đồng bộ tín hiệu Tuyến 06 & Tuyến 13 theo thời gian thực.',
-      timestamp: 'Vừa xong',
-      severity: 'info',
-      durationMs: 4000,
-    },
-  ]);
+  // Toast Notifications State (Empty by default so user is not spammed on open)
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
   const addToast = (toastData: Omit<ToastNotification, 'id' | 'timestamp'>) => {
     const id = `toast_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
@@ -631,16 +619,47 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     changeWeather(nextWeather);
   };
 
+  // Real-time Open-Meteo Weather State
+  const [realtimeWeather, setRealtimeWeather] = useState<VKUWeatherData | null>(null);
+  const [isRealtimeWeatherActive, setIsRealtimeWeatherActive] = useState<boolean>(true);
+  const [isWeatherLoading, setIsWeatherLoading] = useState<boolean>(false);
+
+  const syncRealtimeWeather = async () => {
+    setIsWeatherLoading(true);
+    try {
+      const data = await fetchRealtimeVkuWeather();
+      setRealtimeWeather(data);
+      setWeather(data.condition);
+      setIsRealtimeWeatherActive(true);
+    } catch (err) {
+      console.warn('Realtime weather fallback to preset:', err);
+    } finally {
+      setIsWeatherLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    // Initial fetch on mount
+    syncRealtimeWeather();
+    // Auto-sync real-time weather every 10 minutes
+    const interval = setInterval(syncRealtimeWeather, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+
   const vkuWeather = useMemo(() => {
+    if (isRealtimeWeatherActive && realtimeWeather) {
+      return realtimeWeather;
+    }
     return VKU_WEATHER_PRESETS[weather] || VKU_WEATHER_PRESETS.sunny;
-  }, [weather]);
+  }, [weather, isRealtimeWeatherActive, realtimeWeather]);
 
   const changeWeather = (newWeather: WeatherCondition) => {
+    setIsRealtimeWeatherActive(false);
     setWeather(newWeather);
     const data = VKU_WEATHER_PRESETS[newWeather];
     addToast({
       type: 'weather',
-      title: `Trạm Khí tượng VKU: ${data.conditionLabel}`,
+      title: `Trạm Khí tượng VKU (Mô phỏng): ${data.conditionLabel}`,
       message: `${data.temperatureC}°C, mưa ${data.rainProbabilityPercent}%. ${
         data.aiModeWeightImpact.busBonusPercent >= 20
           ? `AI kích hoạt ưu tiên xe buýt (+${data.aiModeWeightImpact.busBonusPercent}%) để bảo vệ sinh viên khỏi ngập/trượt!`
@@ -945,6 +964,12 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setWeather,
         vkuWeather,
         changeWeather,
+        isRealtimeWeatherActive,
+        isWeatherLoading,
+        syncRealtimeWeather,
+        futaStations: DA_NANG_3_BUS_STATIONS,
+        futaRoutes: FUTA_VKU_ROUTES,
+        getRealtimeFutaDepartures,
         recommendation,
         isAnalyzing,
         analyzeCommute,
