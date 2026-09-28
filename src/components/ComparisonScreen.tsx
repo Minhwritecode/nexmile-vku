@@ -65,47 +65,47 @@ export const ComparisonScreen: React.FC = () => {
   const isBadWeather = vkuWeather.condition === 'rain' || vkuWeather.condition === 'heavy_rain';
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 pb-28 md:pb-16">
+    <div className="space-y-4 sm:space-y-6 animate-in fade-in duration-300 pb-28 md:pb-16 min-w-0 overflow-x-hidden">
       {/* Top Hackathon Demo Banner */}
-      <div className="flex items-center justify-between bg-slate-900/90 border border-slate-800 px-4 py-2 rounded-2xl text-xs">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-          <span className="font-bold text-white">Hệ thống Trợ lý AI Đón Xe Buýt VKU</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900/90 border border-slate-800 px-3 sm:px-4 py-2 rounded-2xl text-xs">
+        <div className="flex items-center gap-2 truncate">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
+          <span className="font-bold text-white truncate">Hệ thống Trợ lý AI Đón Xe Buýt VKU</span>
           <span className="text-slate-400 hidden sm:inline">• Trình diễn thuật toán đa tầng</span>
         </div>
-        <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold">
-          Dữ liệu mô phỏng cho prototype
+        <span className="bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-mono px-2 py-0.5 rounded-full font-bold shrink-0">
+          Dữ liệu mô phỏng prototype
         </span>
       </div>
 
       {/* AI Decision Rationale Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/70 border border-emerald-500/40 p-5 md:p-6 shadow-xl">
-        <div className="flex items-start gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0 text-emerald-400">
-            <Sparkles className="w-5 h-5" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/70 border border-emerald-500/40 p-4 sm:p-5 md:p-6 shadow-xl">
+        <div className="flex items-start gap-3 sm:gap-3.5">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0 text-emerald-400">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
 
-          <div className="flex-1 space-y-1.5">
+          <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
                   Lớp AI 1: Phân tích & Lựa chọn phương án
                 </span>
-                <span className="bg-emerald-500/20 text-emerald-300 text-[11px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/30">
+                <span className="bg-emerald-500/20 text-emerald-300 text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded-full border border-emerald-500/30">
                   Độ tin cậy tổng thể: {recommendation.overallConfidencePercent}%
                 </span>
               </div>
 
               <button
                 onClick={addCurrentTripToHistory}
-                className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+                className="text-xs bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm transition-all active:scale-95 shrink-0"
               >
                 <History className="w-3.5 h-3.5" />
                 <span>Lưu vào Lịch sử</span>
               </button>
             </div>
 
-            <h3 className="text-base sm:text-lg font-bold text-white">
+            <h3 className="text-base sm:text-lg font-bold text-white leading-snug">
               {recommendation.primaryRationale}
             </h3>
 
@@ -113,13 +113,13 @@ export const ComparisonScreen: React.FC = () => {
               {recommendation.detailedExplanation}
             </p>
 
-            <div className="pt-2 flex flex-wrap items-center gap-4 text-xs text-slate-300 border-t border-emerald-900/60 mt-3">
+            <div className="pt-2 flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-300 border-t border-emerald-900/60 mt-3">
               <div className="flex items-center gap-1.5 font-medium">
-                <Clock className="w-3.5 h-3.5 text-amber-400" />
+                <Clock className="w-3.5 h-3.5 text-amber-400 shrink-0" />
                 <span>Nên rời nhà lúc: <strong className="text-amber-300 text-sm font-mono">{recommendation.leaveHomeTime}</strong></span>
               </div>
               <div className="flex items-center gap-1.5 font-medium">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
                 <span>Dự kiến đến VKU: <strong className="text-emerald-300 text-sm font-mono">{recommendation.expectedArrivalTime}</strong> (mục tiêu {desiredArrivalTime})</span>
               </div>
             </div>
@@ -127,16 +127,16 @@ export const ComparisonScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Dynamic Next-Action Banner (Mục tiêu 3: Khi dữ liệu thay đổi, AI tự động đề xuất hành động tiếp theo) */}
-      <div className="rounded-2xl bg-gradient-to-r from-cyan-950/70 via-slate-900 to-slate-900 border border-cyan-500/40 p-4 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex items-start gap-3">
+      {/* Dynamic Next-Action Banner */}
+      <div className="rounded-2xl bg-gradient-to-r from-cyan-950/70 via-slate-900 to-slate-900 border border-cyan-500/40 p-4 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-3 min-w-0">
+        <div className="flex items-start gap-3 min-w-0">
           <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shrink-0 mt-0.5">
             <Zap className="w-5 h-5" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold uppercase tracking-wider text-cyan-400">
-                AI Tự Động Đề Xuất Hành Động Tiếp Theo (Real-Time Next Action)
+                AI Tự Động Đề Xuất Hành Động Tiếp Theo
               </span>
               <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-2 py-0.2 rounded font-mono font-bold">
                 Tự thích ứng
@@ -189,7 +189,7 @@ export const ComparisonScreen: React.FC = () => {
             </span>
           </div>
           <p className="text-[11px] text-slate-300">
-            Vé buýt chỉ 5.000đ, miễn phí gửi xe bãi VKU (tiết kiệm 10–15 phút xếp hàng lấy vé vào giờ cao điểm).
+            Vé buýt chỉ 8.000đ, miễn phí gửi xe bãi VKU (tiết kiệm 10–15 phút xếp hàng lấy vé vào giờ cao điểm).
           </p>
         </div>
 

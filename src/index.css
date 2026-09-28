@@ -43,6 +43,12 @@ html.light {
   color-scheme: light;
 }
 
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+}
+
 html.light body,
 html.light body.light-theme {
   background-color: #f8fafc !important;

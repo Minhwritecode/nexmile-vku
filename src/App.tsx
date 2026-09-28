@@ -198,7 +198,7 @@ const AppContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-36 md:pb-24 select-text">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans pb-36 md:pb-24 select-text max-w-full overflow-x-hidden">
       {/* 3D Three.js Interactive Splash Animation */}
       {showSplash && (
         <Suspense fallback={null}>
@@ -238,7 +238,7 @@ const AppContent: React.FC = () => {
       <Navigation onOpenSimulationModal={() => setIsSimModalOpen(true)} />
 
       {/* Main Screen Container with Touch Gestures Enabled */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 py-4 md:py-6">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-3 sm:px-4 py-3 sm:py-4 md:py-6 min-w-0 overflow-x-hidden">
         <Suspense fallback={<ScreenFallback />}>
           {activeTab === 'home' && <HomeScreen />}
           {activeTab === 'compare' && <ComparisonScreen />}

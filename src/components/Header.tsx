@@ -72,41 +72,41 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+    <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 max-w-full overflow-hidden">
       {/* Top Disclaimer Watermark */}
-      <div className="bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-blue-500/15 border-b border-slate-800 px-3 py-1 text-center">
-        <div className="flex items-center justify-center gap-2 text-xs font-medium text-amber-300">
+      <div className="bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-blue-500/15 border-b border-slate-800 px-2 sm:px-3 py-1 text-center overflow-hidden">
+        <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs font-medium text-amber-300 truncate max-w-full">
           <AlertCircle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-          <span>Dữ liệu mô phỏng cho prototype • Dành riêng cho sinh viên VKU Đà Nẵng</span>
-          <span className="hidden sm:inline-block bg-slate-800/80 text-emerald-400 px-1.5 py-0.5 rounded text-[11px] font-mono border border-emerald-500/30">
+          <span className="truncate">Dữ liệu mô phỏng cho prototype • VKU Đà Nẵng</span>
+          <span className="hidden sm:inline-block bg-slate-800/80 text-emerald-400 px-1.5 py-0.5 rounded text-[11px] font-mono border border-emerald-500/30 shrink-0">
             Tuyến 06 & Tuyến 13
           </span>
         </div>
       </div>
 
       {/* Main Header Bar */}
-      <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+      <div className="max-w-5xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 overflow-hidden">
         {/* Brand & Tagline */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div className="relative">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-950/40 text-white font-black text-lg">
-              <Bus className="w-6 h-6 text-white" />
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-emerald-600 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-950/40 text-white font-black text-lg">
+              <Bus className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
-            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center">
-              <Sparkles className="w-2.5 h-2.5 text-white" />
+            <div className="absolute -bottom-1 -right-1 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-emerald-500 border-2 border-slate-900 flex items-center justify-center">
+              <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-white" />
             </div>
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-300 bg-clip-text text-transparent">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="text-lg sm:text-xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-emerald-300 bg-clip-text text-transparent">
                 NexMile
               </span>
-              <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 uppercase tracking-wider">
-                VKU Edition
+              <span className="bg-emerald-500/20 text-emerald-300 text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-500/30 uppercase tracking-wider">
+                VKU
               </span>
             </div>
-            <p className="text-[11px] text-slate-300 hidden sm:block truncate max-w-md">
+            <p className="text-[11px] text-slate-300 hidden md:block truncate max-w-md">
               <span className="font-semibold text-emerald-400">Choose smarter. Wait less. Arrive on time.</span>
               <span className="text-slate-400"> • Minh (23IT162) & Nhi (24DM078)</span>
             </p>
@@ -114,7 +114,7 @@ export const Header: React.FC<HeaderProps> = ({ onOpenAuth }) => {
         </div>
 
         {/* Action Controls & Clock */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Live Clock */}
           <div className="hidden md:flex items-center gap-1.5 bg-slate-800/60 border border-slate-700/60 px-2.5 py-1 rounded-lg text-xs font-mono text-slate-300">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
