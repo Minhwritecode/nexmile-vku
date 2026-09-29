@@ -62,7 +62,7 @@ export const TrackingScreen: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300">
+    <div className="space-y-6 animate-in fade-in duration-300" data-prevent-swipe="true">
       {/* Route Switcher Tabs */}
       <div className="flex items-center justify-between bg-slate-900/80 p-2 rounded-2xl border border-slate-800">
         <div className="flex items-center gap-2">
@@ -118,7 +118,7 @@ export const TrackingScreen: React.FC = () => {
               </span>
             </div>
             <p className="text-[11px] text-slate-300 mt-0.5">
-              Vận hành các tuyến buýt trợ giá sinh viên VKU (Tuyến 06 & 13) • 05:30 – 19:00 hàng ngày • Vé HSSV: 5.000đ/lượt
+              Vận hành các tuyến buýt trợ giá sinh viên VKU (Tuyến 06 & 13) • 05:30 – 19:00 hàng ngày • Giá vé: 8.000đ/lượt
             </p>
           </div>
         </div>

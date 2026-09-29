@@ -22,10 +22,14 @@ export function useTouchSwipe({
     if (!enabled) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      // Don't trigger if user touched an interactive input, slider, or map canvas
+      // Don't trigger if user touched an interactive input, slider, scrollable area, or map canvas
       const target = e.target as HTMLElement | null;
+      if (!target) return;
+
       if (
-        target?.closest('input, textarea, select, button, [data-prevent-swipe], .leaflet-container')
+        target.closest(
+          'input, textarea, select, button, a, [data-prevent-swipe], .leaflet-container, .overflow-x-auto, .overflow-x-scroll, .scrollbar-none, .no-scrollbar, [role="region"], [role="tabpanel"]'
+        )
       ) {
         return;
       }
